@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.kkroegeraraustech.farmingwithandroid.fragments.UserGuidanceFragment"
+    >
+
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:background="#000000"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="FIELD NAME:"
+                android:textColor="@color/White"
+                android:id="@+id/textViewLat"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:id="@+id/editNumLat"
+                android:background="@color/White"
+                android:textSize="32dp"
+                android:enabled="true"
+                android:text="Descriptive Name"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="CURRENT FIELD TYPE:"
+                android:textColor="@color/White"
+                android:id="@+id/textViewType"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_FieldType"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/White"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:background="@drawable/swaggeruse_shrunk"
+        ></LinearLayout>
+</LinearLayout>
+

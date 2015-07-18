@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.kkroegeraraustech.farmingwithandroid.fragments.UserGuidanceFragment"
+    >
+
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:background="#000000"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="LATITUDE TARGET:"
+                android:textColor="@color/White"
+                android:id="@+id/textViewLat"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/editNumLat"
+                android:background="@color/White"
+                android:textSize="32dp"
+                android:enabled="true"
+                android:text="0.0"
+                android:textAlignment="center" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="LONGITUDE TARGET:"
+                android:textColor="@color/White"
+                android:id="@+id/textViewLon"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:ems="10"
+                android:id="@+id/editNumLon"
+                android:background="@color/White"
+                android:textSize="32dp"
+                android:enabled="true"
+                android:text="0.0"
+                android:textAlignment="center" />
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical">
+            <RelativeLayout android:id="@+id/RelativeLayoutRight"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                xmlns:android="http://schemas.android.com/apk/res/android">
+                <ImageView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:id="@+id/compassPointer"
+                    android:src="@drawable/ic_compass_pointer"
+                    android:layout_centerInParent="true" />
+                <TextView
+                    android:layout_width="333dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="@string/textView_distanceActual"
+                    android:textSize="28dp"
+                    android:textColor="@color/White"
+                    android:id="@+id/textView_distanceActual"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:background="@drawable/swaggeruse_shrunk"
+        >
+        <com.google.android.gms.maps.MapView android:id="@+id/mapview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true" />
+        </LinearLayout>
+</LinearLayout>
+

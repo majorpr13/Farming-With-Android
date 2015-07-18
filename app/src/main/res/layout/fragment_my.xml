@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.kkroegeraraustech.farmingwithandroid.fragments.MainLaunchFragment">
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/position"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text=" The page Number is 1"
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="20sp"/>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/compassPointer"
+        android:layout_gravity="center_horizontal|top"
+        android:src="@drawable/ic_compass_pointer"/>
+
+</FrameLayout>

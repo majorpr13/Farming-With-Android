@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="@drawable/swaggeruse">
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ADD ITEM"
+        android:textSize="32dp"
+        android:id="@+id/button_addITEM"
+        android:layout_marginTop="38dp"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="REVIEW ITEMS"
+        android:textSize="32dp"
+        android:id="@+id/button_revITEM"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/button_addITEM"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SYNC WITH APPLICATION"
+        android:textSize="28dp"
+        android:id="@+id/button_SYNC"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GUIDE ME"
+        android:textSize="32dp"
+        android:id="@+id/button_GUIDANCE"
+        android:textStyle="bold"
+        android:layout_marginBottom="49dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="180dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CAMERA"
+        android:textSize="32dp"
+        android:id="@+id/button_CAMERA"
+        android:textStyle="bold"
+        android:layout_marginTop="380dp"
+        android:layout_marginLeft="185dp"/>
+
+</RelativeLayout>
