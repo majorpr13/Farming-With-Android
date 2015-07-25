@@ -81,7 +81,7 @@ public class DummyFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View layout = inflater.inflate(R.layout.activity_intro_screen, container, false);
+        View layout = inflater.inflate(R.layout.fragment_new_field, container, false);
         /*
         textView = (TextView) layout.findViewById(R.id.position);
         Bundle bundle = getArguments();

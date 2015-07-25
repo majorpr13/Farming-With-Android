@@ -9,10 +9,23 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.logging.Handler;
 
-public class AccelerometerService extends Service {
+public class AccelerometerService extends Service implements SensorEventListener {
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            getAccelerometer(event);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
     public interface UpdateAccelListener
     {
         public void onUpdateAccel(float[] value);
@@ -20,7 +33,6 @@ public class AccelerometerService extends Service {
     public static String ACCEL_SERVICE = "ACCEL_MEAS_SERVICE";
 
     //Sensor Directional Variables
-    //TODO Implement Low-Pass Filter on this data
     private SensorManager mSensorManager;
     private Sensor mAccel;
     private float[] mLastAccelerometer = new float[3];
@@ -32,7 +44,6 @@ public class AccelerometerService extends Service {
     private Handler mHandler = null;
 
     private Context mContext;
-    private AccelSensorListener mOnServiceListenerAccel_Local = new AccelSensorListener();
     private UpdateAccelListener mOnServiceListenerAccel_Remote;
 
     public AccelerometerService() {
@@ -44,20 +55,23 @@ public class AccelerometerService extends Service {
 
     @Override
     public void onCreate() {
+        this.mContext = getApplicationContext();
+        mSensorManager = (SensorManager)mContext.getSystemService(SENSOR_SERVICE);
+        mAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this,mAccel,SensorManager.SENSOR_DELAY_NORMAL);
         super.onCreate();
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startID) {
-        mSensorManager = (SensorManager)getApplicationContext().getSystemService(SENSOR_SERVICE);
-        mAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(mOnServiceListenerAccel_Local,mAccel,SensorManager.SENSOR_DELAY_NORMAL);
+        super.onStartCommand(intent,flag,startID);
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        mSensorManager.unregisterListener(mOnServiceListenerAccel_Local);
+        mSensorManager.unregisterListener(this);
         if(mHandler != null)
         {
             mHandler = null;
@@ -71,7 +85,7 @@ public class AccelerometerService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        public AccelerometerService getInstance() {
+        public AccelerometerService getService() {
             return AccelerometerService.this;
         }
     }
@@ -91,25 +105,13 @@ public class AccelerometerService extends Service {
     }
 
     public void getAccelerometer(SensorEvent event) {
+        //TODO Filter the accelerometer readings
         float[] tmpAccel = event.values;
         mLastAccelerometer = mCurrentAccelerometer;
         mCurrentAccelerometer = tmpAccel;
-        mOnServiceListenerAccel_Remote.onUpdateAccel(tmpAccel);
-    }
-    public class AccelSensorListener implements SensorEventListener{
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-                getAccelerometer(event);
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        if(mOnServiceListenerAccel_Remote != null) {
+            mOnServiceListenerAccel_Remote.onUpdateAccel(tmpAccel);
         }
     }
-
 
 }

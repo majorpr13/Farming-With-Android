@@ -5,62 +5,81 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.kkroegeraraustech.farmingwithandroid.R;
 import com.kkroegeraraustech.farmingwithandroid.extras.Constants;
-import com.kkroegeraraustech.farmingwithandroid.fragments.DummyFragment;
+import com.kkroegeraraustech.farmingwithandroid.fragments.CreateMapBoundayFragment;
+import com.kkroegeraraustech.farmingwithandroid.fragments.NewFieldFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * Created by Ken Heron Systems on 6/2/2015.
  */
-public class TabAdapter extends FragmentPagerAdapter implements Constants {
+public class TabAdapter extends FragmentStatePagerAdapter implements Constants {
+    private CharSequence[] Titles;// This will Store the Titles of the Tabs which are Going to be passed when ViewPagerAdapter is created
+    int NumbOfTabs; // Store the number of tabs, this will also be passed when the ViewPagerAdapter is created
 
-    private final Context mContext;
-    int icons[] = {R.drawable.ic_action_search_orange,
-            R.drawable.ic_action_trending_orange,
-            R.drawable.ic_action_upcoming_orange};
 
-    FragmentManager fragmentManager;
-
-    public TabAdapter(FragmentManager fm, Context context) {
+    public TabAdapter(FragmentManager fm){
         super(fm);
-        mContext = context;
-        fragmentManager = fm;
-    }
+        NewFieldFragment tmpNewFieldFragment = new NewFieldFragment();
+        CreateMapBoundayFragment tmpMapBoundary = new CreateMapBoundayFragment();
 
-    public Fragment getItem(int num) {
-        Fragment fragment = null;
-//            L.m("getItem called for " + num);
-        switch (num) {
-            case TAB_NOTES:
-                fragment = DummyFragment.getInstance(num);
-                //fragment = FragmentSearch.newInstance("", "");
-                break;
-            case TAB_GUIDANCE:
-                fragment = DummyFragment.getInstance(num);
-                break;
-            case TAB_IMAGES:
-                fragment = DummyFragment.getInstance(num);
-                break;
-        }
-        return fragment;
+        List<String> listItems = new ArrayList<String>();
+        listItems.add(tmpNewFieldFragment.getTabName());
+        listItems.add(tmpMapBoundary.getTabName());
+        listItems.add(tmpNewFieldFragment.getTabName());
+
+        Titles = listItems.toArray(new CharSequence[listItems.size()]);
+        NumbOfTabs = listItems.size();
 
     }
+    // Build a Constructor and assign the passed Values to appropriate values in the class
+    public TabAdapter(FragmentManager fm,CharSequence mTitles[], int mNumbOfTabsumb) {
+        super(fm);
 
+        this.Titles = mTitles;
+        this.NumbOfTabs = mNumbOfTabsumb;
+
+    }
+
+    //This method return the fragment for the every position in the View Pager
     @Override
-    public int getCount() {
-        return TAB_COUNT;
+    public Fragment getItem(int position) {
+
+        if(position == 0) // if the position is 0 we are returning the First tab
+        {
+            NewFieldFragment tab1 = new NewFieldFragment();
+            return tab1;
+        }
+        else if(position == 1)             // As we are having 2 tabs if the position is now 0 it must be 1 so we are returning second tab
+        {
+            CreateMapBoundayFragment tab2 = new CreateMapBoundayFragment();
+            return tab2;
+        }
+        else            // As we are having 2 tabs if the position is now 0 it must be 1 so we are returning second tab
+        {
+            NewFieldFragment tab3 = new NewFieldFragment();
+            return tab3;
+        }
+
     }
+
+    // This method return the titles for the Tabs in the Tab Strip
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return mContext.getResources().getStringArray(R.array.tabs)[position];
-        //return context.getStringArray(R.array.tabs)[position];
+        return Titles[position];
     }
 
-    public Drawable getIcon(int position) {
-        return mContext.getResources().getDrawable(icons[position]);
-        //return getResources().getDrawable(icons[position]);
+    // This method return the Number of tabs for the tabs Strip
+
+    @Override
+    public int getCount() {
+        return NumbOfTabs;
     }
 }

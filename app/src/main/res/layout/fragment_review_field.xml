@@ -7,15 +7,42 @@
     tools:context="com.kkroegeraraustech.farmingwithandroid.fragments.UserGuidanceFragment"
     >
 
-    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
-        android:layout_weight="1" android:background="#000000"
-        >
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal">
+
+        <ExpandableListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/expandableListView_fields"
+            android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
 
-    <LinearLayout android:layout_width="fill_parent" android:layout_height="0dp"
-        android:layout_weight="1" android:background="@drawable/swaggeruse_shrunk"
-        ></LinearLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="BACK"
+            android:textSize="18dp"
+            android:id="@+id/button_FieldReview_Back" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ADD FIELD"
+            android:textSize="18dp"
+            android:id="@+id/button_FieldReview_Add" />
+    </LinearLayout>
 </LinearLayout>
 

@@ -90,7 +90,7 @@ public class MainLaunchFragment extends Fragment implements View.OnClickListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Log.d("View ID","On Create View");
-        layout = inflater.inflate(R.layout.fragment_useritems,container,false);
+        layout = inflater.inflate(R.layout.fragment_main_launch,container,false);
 
         /*
         layout = inflater.inflate(R.layout.fragment_useritems,container,false);
@@ -100,9 +100,9 @@ public class MainLaunchFragment extends Fragment implements View.OnClickListener
         listTemp.setAdapter(adapterUserItems);
         */
         //for main launch screen
-        //layout = inflater.inflate(R.layout.main_intro_screen, container, false);
+        layout = inflater.inflate(R.layout.main_intro_screen, container, false);
 
-        /*
+
         //Handle the buttons on the screen
         Button button_addITEM = (Button)layout.findViewById(R.id.button_addITEM);
         Button button_revITEM = (Button)layout.findViewById(R.id.button_revITEM);
@@ -115,20 +115,20 @@ public class MainLaunchFragment extends Fragment implements View.OnClickListener
         button_SYNC.setOnClickListener(this);
         button_CAMERA.setOnClickListener(this);
         button_GUIDANCE.setOnClickListener(this);
-        */
+
         return layout;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        /*
         ExpandableListView listTemp = (ExpandableListView)layout.findViewById(R.id.listView);
         ArrayList<ExpandableListItems_Parent> groups = prepareData();
         Review_ExpandableListAdapter adapterUserItems = new Review_ExpandableListAdapter(getActivity(), groups);
         listTemp.setAdapter(adapterUserItems);
         listTemp.setGroupIndicator(null);
-
+        */
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -1,5 +1,22 @@
 package com.kkroegeraraustech.farmingwithandroid.views;
+/*
+ * Copyright 2014 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+
+import android.R;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,10 +26,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
-/**
- * Created by Ken Heron Systems on 6/2/2015.
- */
-public class SlidingTabStrip extends LinearLayout {
+
+class SlidingTabStrip extends LinearLayout {
 
 
     private static final int DEFAULT_BOTTOM_BORDER_THICKNESS_DIPS = 0;
@@ -50,7 +65,7 @@ public class SlidingTabStrip extends LinearLayout {
 
 
         TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorForeground, outValue, true);
+        context.getTheme().resolveAttribute(R.attr.colorForeground, outValue, true);
         final int themeForegroundColor = outValue.data;
 
 
@@ -170,4 +185,3 @@ public class SlidingTabStrip extends LinearLayout {
         }
     }
 }
-

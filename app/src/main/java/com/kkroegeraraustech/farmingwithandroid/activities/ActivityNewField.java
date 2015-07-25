@@ -1,19 +1,40 @@
 package com.kkroegeraraustech.farmingwithandroid.activities;
 
-import android.support.v7.app.ActionBarActivity;
+import android.net.Uri;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.kkroegeraraustech.farmingwithandroid.R;
+import com.kkroegeraraustech.farmingwithandroid.fragments.CreateMapBoundayFragment;
+import com.kkroegeraraustech.farmingwithandroid.fragments.NewFieldFragment;
 
 
-public class ActivityNewField extends ActionBarActivity {
+public class ActivityNewField extends FragmentActivity implements NewFieldFragment.OnFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_field);
+
+        if (findViewById(R.id.fragment_container) != null) {
+
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create an instance of ExampleFragment
+            //NewFieldFragment firstFragment = new NewFieldFragment();
+            CreateMapBoundayFragment firstFragment = new CreateMapBoundayFragment();
+            // Add the fragment to the 'fragment_container' FrameLayout
+            android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.fragment_container,firstFragment).commit();
+        }
     }
 
 
@@ -37,5 +58,10 @@ public class ActivityNewField extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

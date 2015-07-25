@@ -24,6 +24,8 @@ import java.util.logging.LogRecord;
 
 public class GPSTrackingService extends Service implements LocationListener{
 
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
+
     public interface UpdateGPSListener
     {
         public void onUpdateLocation(Location newLocation);
@@ -54,10 +56,10 @@ public class GPSTrackingService extends Service implements LocationListener{
     double longitude; // longitude
 
     // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES_LOOSE = 10;
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 5; // 5 seconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 2; // 5 seconds
     private static final long MIN_TIME_BW_UPDATES_LOOSE = 1000 * 1; // 5 seconds
     // Declaring a Location Manager
     protected LocationManager mLocationManager;
@@ -249,14 +251,12 @@ public class GPSTrackingService extends Service implements LocationListener{
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.e("TAG","NEW LOCATION");
-            double tempDouble = location.getLatitude();
-            String tempString = Double.toString(tempDouble);
-            Log.e("TAG",tempString);
-            tempDouble = location.getLongitude();
-            tempString = Double.toString(tempDouble);
-            Log.e("TAG",tempString);
-            mOnServiceListenerGPS_Remote.onUpdateLocation(location);
+
+            if(isBetterLocation(location,mLocation) == true){
+                //this means the new location is better thank the previous
+                mLocation = location;
+                mOnServiceListenerGPS_Remote.onUpdateLocation(location);
+            }
         }
 
         @Override
@@ -273,4 +273,54 @@ public class GPSTrackingService extends Service implements LocationListener{
         public void onProviderDisabled(String provider) {
 
         }
+
+    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+        if (currentBestLocation == null) {
+            // A new location is always better than no location
+            return true;
+        }
+
+        // Check whether the new location fix is newer or older
+        long timeDelta = location.getTime() - currentBestLocation.getTime();
+        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isNewer = timeDelta > 0;
+
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved
+        if (isSignificantlyNewer) {
+            return true;
+            // If the new location is more than two minutes older, it must be worse
+        } else if (isSignificantlyOlder) {
+            return false;
+        }
+
+        // Check whether the new location fix is more or less accurate
+        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+        boolean isLessAccurate = accuracyDelta > 0;
+        boolean isMoreAccurate = accuracyDelta < 0;
+        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+        // Check if the old and new location are from the same provider
+        boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
+
+        // Determine location quality using a combination of timeliness and accuracy
+        if (isMoreAccurate) {
+            return true;
+        } else if (isNewer && !isLessAccurate) {
+            return true;
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks whether two providers are the same */
+    private boolean isSameProvider(String provider1, String provider2) {
+        if (provider1 == null) {
+            return provider2 == null;
+        }
+        return provider1.equals(provider2);
+    }
 }

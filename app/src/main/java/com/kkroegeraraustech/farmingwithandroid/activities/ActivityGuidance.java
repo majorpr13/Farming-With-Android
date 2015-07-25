@@ -16,11 +16,13 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.kkroegeraraustech.farmingwithandroid.R;
 import com.kkroegeraraustech.farmingwithandroid.fragments.UserGuidanceFragment;
 import com.kkroegeraraustech.farmingwithandroid.helpers.GPSHelper;
@@ -34,29 +36,6 @@ import com.kkroegeraraustech.farmingwithandroid.extras.Constants;
  * This activity tests the guidance routine
  */
 public class ActivityGuidance extends FragmentActivity implements SensorEventListener, Constants {
-    private GPSTrackingService mGPSTrackingService = new GPSTrackingService(ActivityGuidance.this);
-    private AccelerometerService mAccelService = new AccelerometerService();
-    private MagnetometerService mMagService = new MagnetometerService();
-
-    private GPSTrackingService.UpdateGPSListener mGPSListener = new GPSTrackingService.UpdateGPSListener() {
-        @Override
-        public void onUpdateDeclination(double newDeclination) {
-            mCurrentGPS.setDeclination(newDeclination);
-        }
-
-        @Override
-        public void onUpdateLocation(Location newLocation) {
-            mCurrentGPS.setValueGPS(mGPSTrackingService.getLatitude(),mGPSTrackingService.getLongitude());
-            //GeomagneticField geoField = new GeomagneticField(mCurrentGPS.getValue_Latitude(),mCurrentGPS.getValue_Longitude(),mCurrentGPS.getValue_Altitude());
-            //mDeclination = geoField.getDeclination();
-            if(guidanceFragment != null) {
-                guidanceFragment.setUserLocation(mCurrentGPS);
-            }
-
-        }
-    };
-    private MagServiceListener mMagListener = new MagServiceListener();
-    private AccelServiceListener mAccelListener = new AccelServiceListener();
 
     private boolean mGPSServiceBounded = false;
     private boolean mACCELerviceBounded = false;
@@ -73,27 +52,91 @@ public class ActivityGuidance extends FragmentActivity implements SensorEventLis
 
     private double mDeclination = 0.0;
     private GPSHelper mCurrentGPS = new GPSHelper();
-
     UserGuidanceFragment guidanceFragment;
 
-    class AccelServiceListener implements AccelerometerService.UpdateAccelListener
-    {
+
+    private GPSTrackingService mGPSTrackingService = new GPSTrackingService(ActivityGuidance.this);
+    private AccelerometerService mAccelService = new AccelerometerService(ActivityGuidance.this);
+    private MagnetometerService mMagService = new MagnetometerService(ActivityGuidance.this);
+
+    private ServiceConnection mConnectionGPS = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
+        {
+            mGPSTrackingService = ((GPSTrackingService.LocalBinder)iBinder).getInstance();
+            mGPSTrackingService.setOnServiceListener(mGPSListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName)
+        {
+            mGPSTrackingService = null;
+        }
+    };
+
+    private ServiceConnection mConnectionAccel = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
+        {
+            mAccelService = ((AccelerometerService.LocalBinder)iBinder).getService();
+            mAccelService.setOnServiceListener(mAccelListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName)
+        {
+            mAccelService = null;
+        }
+    };
+
+    private ServiceConnection mConnectionMag = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
+        {
+            mMagService = ((MagnetometerService.LocalBinder)iBinder).getInstance();
+            mMagService.setOnServiceListener(mMagListener);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName)
+        {
+            mMagService = null;
+        }
+    };
+
+    private GPSTrackingService.UpdateGPSListener mGPSListener = new GPSTrackingService.UpdateGPSListener() {
+        @Override
+        public void onUpdateDeclination(double newDeclination) {
+            mCurrentGPS.setDeclination(newDeclination);
+        }
+
+        @Override
+        public void onUpdateLocation(Location newLocation) {
+            mCurrentGPS.setLocation(newLocation);
+            if(guidanceFragment != null) {
+                guidanceFragment.setUserLocation(mCurrentGPS);
+            }
+
+        }
+    };
+    private AccelerometerService.UpdateAccelListener mAccelListener = new AccelerometerService.UpdateAccelListener(){
         @Override
         public void onUpdateAccel(float[] value) {
             mAccelerometer = value;
             bool_newAccelData = true;
             computeNewBearing();
         }
-    }
-    class MagServiceListener implements MagnetometerService.UpdateMagListener
-    {
+    };
+
+    private MagnetometerService.UpdateMagListener mMagListener = new MagnetometerService.UpdateMagListener(){
         @Override
         public void onUpdateMag(float[] value) {
             mMagnetometer = value;
-            bool_newMagData =true;
+            bool_newMagData = true;
             computeNewBearing();
         }
-    }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,10 +161,27 @@ public class ActivityGuidance extends FragmentActivity implements SensorEventLis
             fragmentTransaction.commit();
         }
 
+        /*
         startService(new Intent(this.getBaseContext(), GPSTrackingService.class));
-        //startService(new Intent(this.getBaseContext(), AccelerometerService.class));
-        //startService(new Intent(this.getBaseContext(), MagnetometerService.class));
+        startService(new Intent(this.getBaseContext(), AccelerometerService.class));
+        startService(new Intent(this.getBaseContext(), MagnetometerService.class));
         doBindServices();
+        */
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        doBindServices();
+        if(mGPSServiceBounded) {
+            startService(new Intent(this, GPSTrackingService.class));
+        }
+        if(mACCELerviceBounded) {
+            startService(new Intent(this, AccelerometerService.class));
+        }
+        if(mMAGerviceBounded) {
+            startService(new Intent(this, MagnetometerService.class));
+        }
     }
 
     protected void onResume() {
@@ -135,7 +195,7 @@ public class ActivityGuidance extends FragmentActivity implements SensorEventLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        doUnbindService();
+        //doUnbindService();
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -168,62 +228,16 @@ public class ActivityGuidance extends FragmentActivity implements SensorEventLis
         return super.onOptionsItemSelected(item);
     }
 
-    private ServiceConnection mConnectionGPS = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
-        {
-            mGPSTrackingService = ((GPSTrackingService.LocalBinder)iBinder).getInstance();
-            mGPSTrackingService.setOnServiceListener(mGPSListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName)
-        {
-            mGPSTrackingService = null;
-        }
-    };
-
-    private ServiceConnection mConnectionAccel = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
-        {
-            mAccelService = ((AccelerometerService.LocalBinder)iBinder).getInstance();
-            mAccelService.setOnServiceListener(mAccelListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName)
-        {
-            mAccelService = null;
-        }
-    };
-
-    private ServiceConnection mConnectionMag = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
-        {
-            mMagService = ((MagnetometerService.LocalBinder)iBinder).getInstance();
-            mMagService.setOnServiceListener(mMagListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName)
-        {
-            mMagService = null;
-        }
-    };
 
     private void doBindServices() {
         // Establish a connection with the service.  We use an explicit
         // class name because we want a specific service implementation that
         // we know will be running in our own process (and thus won't be
         // supporting component replacement by other applications).
-        bindService(new Intent(this, GPSTrackingService.class), mConnectionGPS, Context.BIND_AUTO_CREATE);
-        //bindService(new Intent(this,AccelerometerService.class), mConnectionAccel, Context.BIND_AUTO_CREATE);
-        //bindService(new Intent(this,MagnetometerService.class), mConnectionMag, Context.BIND_AUTO_CREATE);
-        mGPSServiceBounded = true;
-        //mACCELerviceBounded = true;
-        //mMAGerviceBounded = true;
+
+        mGPSServiceBounded = bindService(new Intent(this, GPSTrackingService.class), mConnectionGPS, Context.BIND_AUTO_CREATE);
+        mACCELerviceBounded = bindService(new Intent(this,AccelerometerService.class), mConnectionAccel, Context.BIND_AUTO_CREATE);
+        mMAGerviceBounded = bindService(new Intent(this,MagnetometerService.class), mConnectionMag, Context.BIND_AUTO_CREATE);
     }
 
     private void doUnbindService()
@@ -231,40 +245,41 @@ public class ActivityGuidance extends FragmentActivity implements SensorEventLis
         if (mGPSServiceBounded)
         {
             // Detach our existing connection.
-            unbindService(mConnectionGPS);
+            this.unbindService(mConnectionGPS);
             mGPSServiceBounded = false;
         }
         if (mACCELerviceBounded)
         {
             // Detach our existing connection.
-            unbindService(mConnectionAccel);
+            this.unbindService(mConnectionAccel);
             mMAGerviceBounded  = false;
         }
         if (mMAGerviceBounded)
         {
             // Detach our existing connection.
-            unbindService(mConnectionMag);
+            this.getApplicationContext().unbindService(mConnectionMag);
             mMAGerviceBounded  = false;
         }
     }
 
     private void computeNewBearing()
     {
-        if((bool_newAccelData == true) && (bool_newMagData)){
+
+        if((bool_newAccelData == true) && (bool_newMagData == true)){
+            bool_newAccelData = false;
+            bool_newMagData = false;
+
             boolean success = SensorManager.getRotationMatrix(mRMatrix, mIMatrix, mAccelerometer, mMagnetometer);
             if(success == true) {
-                SensorManager.getOrientation(mRMatrix,mOrientationVector);
-                //TODO rotate the sign by this thing
-                /*
-                double azimuth = Math.toDegrees(matrixValues[0]);
-                double pitch = Math.toDegrees(matrixValues[1]);
-                double roll = Math.toDegrees(matrixValues[2]);
 
-                readingAzimuth.setText("Azimuth: " + String.valueOf(azimuth));
-                readingPitch.setText("Pitch: " + String.valueOf(pitch));
-                readingRoll.setText("Roll: " + String.valueOf(roll));
-                */
-                //guidanceFragment.setDirection(0.0);
+                SensorManager.getOrientation(mRMatrix, mOrientationVector);
+                //TODO rotate the sign by this thing
+
+                double azimuth = Math.toDegrees(mOrientationVector[0]);
+                double pitch = mOrientationVector[1];
+                double roll = mOrientationVector[2];
+
+                guidanceFragment.setDirection(azimuth);
             }
         }
     }

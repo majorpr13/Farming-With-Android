@@ -1,5 +1,6 @@
 package com.kkroegeraraustech.farmingwithandroid.fragments;
 
+import android.graphics.Color;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -14,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,11 +33,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 //Import Relevant Kenny Files
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.kkroegeraraustech.farmingwithandroid.R;
 import com.kkroegeraraustech.farmingwithandroid.helpers.GPSHelper;
 import com.kkroegeraraustech.farmingwithandroid.helpers.MarkerHelper;
@@ -71,13 +78,8 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
         private float[] mR = new float[9];
         private float[] mOrientation = new float[3];
         private float mCurrentDegree = 0f;
+        private float mCurrentHeading = 0f;
         private ImageView mCompassImage;
-
-        //this enables us to get the declination
-        float tempFloat  = 0;
-        long tempLong = 0;
-        private GeomagneticField geoField = new GeomagneticField(tempFloat,tempFloat,tempFloat,tempLong);
-        private float mDeclination;
     //End Sensor Directional Variables
 
     //GPS Positioning Variables
@@ -96,8 +98,8 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
         private static final long minDistanceUpdate = 3; //33 meters
         private static final long minTimUpdates = 5000; //5 seconds time is in milliseconds
 
-        private GPSHelper mCurrentLocation = new GPSHelper();
-        private GPSHelper mTargetLocation = new GPSHelper(0.0,0.0,GPSHelper.Interface_GPS_Tag.GPS_Target);
+        private GPSHelper mCurrentLocation;
+        private GPSHelper mTargetLocation;
 
         MarkerHelper mMarkerHelper = new MarkerHelper();
     //End Positioning Variables
@@ -140,9 +142,8 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCurrentLocation.setValueTag(GPSHelper.Interface_GPS_Tag.GPS_User);
-        mDeclination = geoField.getDeclination();
-
+        mCurrentLocation = new GPSHelper(38.8,-77.0,GPSHelper.Interface_GPS_Tag.GPS_User);
+        mTargetLocation = new GPSHelper(38.801693,-77.066926,GPSHelper.Interface_GPS_Tag.GPS_Target);
     }
 
     @Override
@@ -163,7 +164,6 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
         }
         //if (evaluateBool != false) {
             //Establish the compass pointer setup
-            mCompassImage = (ImageView)mLayout.findViewById(R.id.compassPointer);
             mCompassImage = (ImageView)mLayout.findViewById(R.id.compassPointer);
             setDirection(0.0f);
 
@@ -191,7 +191,7 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
                     tmpLat = Double.parseDouble(tmpString);
                 }
                 else {
-                    textLat.setText("0.0");
+                    //There was nothing in this box or it was invalid and therefore we will not do anything but assume the value is zero
                 }
                 mTargetLocation.setValueLatitude(tmpLat);
                 setTargetLocation(mTargetLocation);
@@ -217,7 +217,7 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
                     tmpLon = Double.parseDouble(tmpString);
                 }
                 else {
-                    textLat.setText("0.0");
+                    //There was nothing in this box or it was invalid and therefore we will not do anything but assume the value is zero
                 }
 
                 mTargetLocation.setValueLongitude(tmpLon);
@@ -294,32 +294,42 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
         }
     }
 
-    public void setDirection(float directionDeg) {
-        //float bearing = mCurrentLocation.mLocation.bearingTo(mTargetLocation.mLocation);
-        //float heading = mCurrentLocation.mLocation.getBearing();
-        //heading += mDeclination;
-        //heading = (bearing - heading) * -1;
+    /**
+     *
+     * @param directionDeg
+     */
+    public void setDirection(double directionDeg) {
+        double bearing = mCurrentLocation.mLocation.bearingTo(mTargetLocation.mLocation);
+        double heading = directionDeg;
+        heading += mCurrentLocation.getDeclination();
+        heading = (bearing - heading) * -1;
+        if(heading >= 0.0f && heading <= 180.0f){
+            heading = heading;
+        }else{
+            heading =  180 + (180 + heading);
+        }
         //heading = (heading + 360) % 360;
 
-        RotateAnimation ra = new RotateAnimation(mCurrentDegree, -directionDeg, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        RotateAnimation ra = new RotateAnimation(mCurrentDegree, (float)-heading, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
         ra.setDuration(200);
         ra.setFillAfter(true);
         mCompassImage.startAnimation(ra);
-        //mCurrentDegree = -heading;
-        mCurrentDegree = -directionDeg;
+        mCurrentDegree = (float)-heading;
     }
 
-    public void setUserLocation(GPSHelper currentLocation) {
+    public void setUserLocation(GPSHelper currentLocation){
+        LatLng tmpLatLng = new LatLng(mCurrentLocation.getValue_Latitude(), mCurrentLocation.getValue_Longitude());
         mMarkerHelper.removeMarker("Current Location");
-        mCurrentLocation.setValueGPS(currentLocation.getValue_Latitude(), currentLocation.getValue_Longitude());
-        mCurrentLocation.setDeclination(currentLocation.getDeclination());
+        mMarkerHelper.removeCircle("Current Location");
 
-        Double.toString(currentLocation.getValue_Latitude());
-        Double.toString(currentLocation.getValue_Longitude());
-        String snippetString = " ";
+        mCurrentLocation.setLocation(currentLocation.getLocation());
 
-        Marker currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getValue_Latitude() , mCurrentLocation.getValue_Longitude())).title("USER").snippet(snippetString));
+        Marker currentMarker = mMap.addMarker(new MarkerOptions().position(tmpLatLng).title("USER").flat(true).anchor(0.5f, 0.5f).rotation(mCurrentHeading).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
         mMarkerHelper.addMarker("Current Location", currentMarker);
+
+        Circle currentCircle = mMap.addCircle(new CircleOptions().center(tmpLatLng).radius(currentLocation.mLocation.getAccuracy()).strokeColor(Color.BLUE).fillColor(0x2A0000FF));   // you can choose any color, I just set some randomly.fillColor(0x2A0000FF));
+        mMarkerHelper.addCircle("Current Location", currentCircle);
+
         setDistance();
     }
     public void setTargetLocation(GPSHelper currentLocation) {
@@ -372,10 +382,8 @@ public class UserGuidanceFragment extends Fragment implements SensorEventListene
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         // For dropping a marker at a point on the Map
-        Marker currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getValue_Latitude() , mCurrentLocation.getValue_Longitude())).title("ME").snippet("Current Location"));
-        mMarkerHelper.addMarker("Current Location" , currentMarker);
-        Marker targetMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(mTargetLocation.getValue_Latitude() , mTargetLocation.getValue_Longitude())).title("TARGET").snippet("Target Location"));
-        mMarkerHelper.addMarker("Target Location" , targetMarker);
+        setUserLocation(mCurrentLocation);
+        setTargetLocation(mTargetLocation);
         // For zooming automatically to the Dropped PIN Location
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getValue_Latitude(), mCurrentLocation.getValue_Longitude()), 10);
         mMap.animateCamera(cameraUpdate);

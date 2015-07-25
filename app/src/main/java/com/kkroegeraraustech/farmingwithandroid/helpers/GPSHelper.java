@@ -1,5 +1,6 @@
 package com.kkroegeraraustech.farmingwithandroid.helpers;
 
+import android.hardware.GeomagneticField;
 import android.location.Location;
 
 /**
@@ -16,6 +17,7 @@ public class GPSHelper {
     public Location mLocation = new Location("");
     private double mValueLatitude;
     private double mValueLongitude;
+    private double mValueAltitude;
     private double mDeclination;
     private String mTagDescriptor;
 
@@ -24,6 +26,7 @@ public class GPSHelper {
         this.mValueLatitude = 38.761751;
         this.mValueLongitude = -77.098817;
         mDeclination = 0.0;
+        mValueAltitude = 0.0;
         this.mLocation.setLatitude(this.mValueLatitude);
         this.mLocation.setLongitude(this.mValueLongitude);
         this.mTagDescriptor = Interface_GPS_Tag.GPS_Location;
@@ -31,7 +34,7 @@ public class GPSHelper {
     }
 
     //overloaded constructor
-    public GPSHelper(double longitude, double latitude, String TagDescriptor)
+    public GPSHelper(double latitude, double longitude, String TagDescriptor)
     {
         this.mValueLatitude = latitude;
         this.mValueLongitude = longitude;
@@ -44,7 +47,6 @@ public class GPSHelper {
     public void setValueGPS(double latitude, double longitude) {
         this.mValueLatitude = latitude;
         this.mValueLongitude = longitude;
-
         this.mLocation.setLatitude(latitude);
         this.mLocation.setLongitude(longitude);
     }
@@ -52,6 +54,21 @@ public class GPSHelper {
     public void setValueLatitude(double latitude){
         this.mValueLatitude = latitude;
         this.mLocation.setLatitude(latitude);
+    }
+
+    public void setLocation(Location desLocation){
+        mValueLatitude = desLocation.getLatitude();
+        mValueLongitude = desLocation.getLongitude();
+        mValueAltitude = desLocation.getAltitude();
+        GeomagneticField geoField = new GeomagneticField((float)mValueLatitude,(float)mValueLongitude,(float)mValueAltitude, System.currentTimeMillis());
+        mDeclination = (double)geoField.getDeclination();
+        mLocation.set(desLocation);
+
+    }
+
+    public Location getLocation(){
+        Location tempLocation = mLocation;
+        return(tempLocation);
     }
 
     public void setValueLongitude(double longitude) {
@@ -77,6 +94,14 @@ public class GPSHelper {
     public Location getValue_Location()
     {
         return(mLocation);
+    }
+
+    public void setAltitude(double currentAltitude){
+        this.mValueAltitude = currentAltitude;
+    }
+
+    public double getAltitude(){
+        return(mValueAltitude);
     }
 
     public void setDeclination(double currentDeclination){

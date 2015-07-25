@@ -9,10 +9,24 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.logging.Handler;
 
-public class MagnetometerService extends Service {
+public class MagnetometerService extends Service implements SensorEventListener{
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+            getMagnetometer(event);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
     public interface UpdateMagListener
     {
         public void onUpdateMag(float[] value);
@@ -32,7 +46,6 @@ public class MagnetometerService extends Service {
     private Handler mHandler = null;
 
     private Context mContext;
-    private MagSensorListener mOnServiceListenerMag_Local = null;
     private UpdateMagListener mOnServiceListenerMag_Remote = null;
 
     public MagnetometerService() {
@@ -44,20 +57,22 @@ public class MagnetometerService extends Service {
 
     @Override
     public void onCreate() {
+        this.mContext = getApplicationContext();
+        mSensorManager = (SensorManager)getApplicationContext().getSystemService(SENSOR_SERVICE);
+        mMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mSensorManager.registerListener(this,mMag,SensorManager.SENSOR_DELAY_NORMAL);
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startID) {
-        mSensorManager = (SensorManager)getApplicationContext().getSystemService(SENSOR_SERVICE);
-        mMag = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(mOnServiceListenerMag_Local,mMag,SensorManager.SENSOR_DELAY_NORMAL);
+        super.onStartCommand(intent,flag,startID);
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        mSensorManager.unregisterListener(mOnServiceListenerMag_Local);
+        mSensorManager.unregisterListener(this);
         if(mHandler != null)
         {
             mHandler = null;
@@ -90,25 +105,12 @@ public class MagnetometerService extends Service {
         mOnServiceListenerMag_Remote = serviceListener;
     }
 
-    public void getAccelerometer(SensorEvent event) {
+    public void getMagnetometer(SensorEvent event) {
         float[] tmpMag = event.values;
         mLastMagnetometer = mCurrentMagnetometer;
         mCurrentMagnetometer = tmpMag;
-        mOnServiceListenerMag_Remote.onUpdateMag(tmpMag);
-    }
-
-    public class MagSensorListener implements SensorEventListener {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
-                getAccelerometer(event);
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        if(mOnServiceListenerMag_Remote != null) {
+            mOnServiceListenerMag_Remote.onUpdateMag(tmpMag);
         }
     }
 
